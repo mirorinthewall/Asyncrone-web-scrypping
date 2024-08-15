@@ -1,0 +1,29 @@
+import asyncio
+import aiohttp
+from bs4 import BeautifulSoup
+
+async def fetch(session, url):
+    async with session.get(url) as response:
+        return await response.text()
+
+async def scrape(url):
+    async with aiohttp.ClientSession() as session:
+        html = await fetch(session, url)
+        soup = BeautifulSoup(html, 'html.parser')
+        return soup.title.text
+
+async def main(urls):
+    tasks = []
+    for url in urls:
+        tasks.append(scrape(url))
+    titles = await asyncio.gather(*tasks)
+    for i, title in enumerate(titles):
+        print(f"Title {i+1}: {title}")
+
+urls = [
+    'https://example.com',
+    'https://www.python.org',
+    'https://www.github.com'
+]
+
+asyncio.run(main(urls))
